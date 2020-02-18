@@ -51,7 +51,8 @@ void init()
 	curs_set(0);//个函数用来设制光标是否可见。它的参数可以是：0（不可见），1（可见），2（完全可见）
 
 	empty = 15;
-	srand(time(0));//用当前时间来设定rand函数所用的随机数产生演算法的种子值。
+	srand(time(0));//用当前时间来设定rand函数所用的随机数产生演算法的种子值。rand（）产生随机数时，如果用srand（seed）播下种子之后，一旦种子相同（下面的getpid方法），产生的随机数将是相同的。当然很多时候刻意让rand（）产生的随机数随机化，用时间作种子 srand（time（NULL）），这样每次运行程序的时间肯定是不相同的，产生的随机数肯定就不一样了。
+
 	x = rand() % 4;
 	y = rand() % 4;
 	a[y][x] = 2;
@@ -94,22 +95,22 @@ void draw()
 void draw_one(int y, int x)
 {
     int i, m, k, j;
-    char c[5] = {0x00}; //数字的
+    char c[5] = {0x00}; //数字的字符串形式，第五个元素为0
     i = a[y][x];//画出这个位置的数字
     m = 0;
-    while(i > 0)
+    while(i > 0)//十进制求出每一位数字，变成字符形式保存到数组c中
     {
-        j = i % 10;//余数
+        j = i % 10;
         c[m++] = j + '0';
         i = i / 10;
     }
     m = 0;
-    k = (x + 1) * 5 - 1;
-    while(c[m] != 0x00)
+    k = (x + 1) * 5 - 1;//输出字符的位置，乘以5是为了调整在屏幕中的位置
+    while(c[m] != 0x00)//字符还没输出完
     {
-        move(2*y+1, k);
-        addch(c[m++]);
-        k--;
+        move(2*y+1, k);//y改变也是为了调整到屏幕中的位置
+        addch(c[m++]);//将字符打印出来，但是没有刷新，故不会显示出来
+        k--;//从右往左挪光标
     }
 }
 
@@ -127,59 +128,60 @@ void play()
 		switch(ch) {
 			case 97:
 			case 104:
-			case 68:
-				for(y = 0; y < 4; y++)
-					for(x = 0; x < 4; ) 
+			case 68://左移
+				
+				for(y = 0; y < 4; y++)//按行求每个点的新值
+					for(x = 0; x < 4; ) //第一种情况是：首元素非零
 					{
-						if(a[y][x] == 0) 
+						if(a[y][x] == 0) //默认没有数就是0，首元素为零
 						{
-							x++;
-							continue;
+							x++;//看左面的那个数
+							continue;//继续下一层循环，就是当前位置的右边
 						} 
-						else 
+						else //该行首元素不为为零
 						{
-							for(i = x + 1; i < 4; i++) 
+							for(i = x + 1; i < 4; i++) //如果当前位置不是0，就要加上右边的那个数
 							{
-								if(a[y][i] == 0) 
+								if(a[y][i] == 0) //右边相邻没有，就继续往右找，直到找到第一个非零的
 								{
 									continue;
 								}
 								else 
 								{
-									if(a[y][x] == a[y][i]) 
+									if(a[y][x] == a[y][i]) //两个数相等
 									{
-										a[y][x] += a[y][i];
-										a[y][i] = 0;
-										empty++;
-										break;
+										a[y][x] += a[y][i];//左边翻倍
+										a[y][i] = 0;//右边归零
+										empty++;//空的值变多
+										break;//强行结束本层循环
 									}
 									else 
 									{
-										break;
+										break;//如果不相等也结束，不再找该位置右边的东西了
 									}
 								}
 							}
-							x = i;
+							x = i;//从归零位置（已经加完了）往右边判断,进行求和等一系列判断
 						}
 					}
 				for(y = 0; y < 4; y++)
-					for(x = 0; x < 4; x++) 
+					for(x = 0; x < 4; x++) //第二种情况：第一个非零元素不是首元素
 					{
 						if(a[y][x] == 0) 
 						{
 							continue;
 						} 
-						else 
+						else //找到非零了，但是左边是零
 						{
 							for(i = x; (i > 0) && (a[y][i-1] == 0); i--) 
 							{
-								a[y][i-1] = a[y][i];
-								a[y][i] = 0;
-							    move = 1;
+								a[y][i-1] = a[y][i];//右边的数赋值给左边
+								a[y][i] = 0;//右边的数归零
+							    move = 1;//标记进行了移动
 							}
 						}
 					}
-				break;
+				break;//结束switch，等输入新的值
 			case 100:
 			case 108:
 			case 67:
@@ -342,28 +344,28 @@ void play()
 				continue;
 				break;
 		}
-		if(empty <= 0)
+		if(empty <= 0)//满了就结素游戏
 			game_over();
-		if((empty != old_empty) || (move == 1)) 
+		if((empty != old_empty) || (move == 1)) //进行挪动了---标记：1.空格数变了，2.做了移动----》那么就重新生成新的非零数
 		{ 
 			do{
 				new_x = rand() % 4;
-				new_y = rand() % 4;
+				new_y = rand() % 4;//生成的新坐标
 			}while(a[new_y][new_x] != 0);
 
-			cnt_value(&new_y, &new_x);
+			cnt_value(&new_y, &new_x);//找到最佳新坐标
 
 			do {
-				temp = rand() % 4;
-			}while(temp == 0 || temp == 2);
-			a[new_y][new_x] = temp + 1;
+				temp = rand() % 4;//产生随机数，直到产生的随机数与4的余数不是0或者2，即产生的数temp是0到3的
+			}while(temp == 0 || temp == 2);//temp是余数，跳出循环时，temp为1或3
+			a[new_y][new_x] = temp + 1;//产生的新数是2或4
 			empty--;
 		}
-		draw();
+		draw();//重新画表
 	}
 }
 
-int cnt_one(int y, int x)
+int cnt_one(int y, int x)//判断他的周围有几个是空的
 {
 	int value = 1;
 
@@ -392,20 +394,20 @@ void cnt_value(int *new_y, int *new_x)
 	int max_x, max_y, x, y, value;
 	int max = 0;
 
-	max = cnt_one(*new_y, *new_x);
+	max = cnt_one(*new_y, *new_x);//max表新位置周围最大的空数
 	for(y = 0; y < 4; y++)
-		for(x = 0; x < 4; x++) 
+		for(x = 0; x < 4; x++) //为了找到一个空位置，他的相邻空位置数最多
 		{
-			if(!a[y][x]) 
+			if(!a[y][x]) //遍历所有空的位置
 			{
 				value = cnt_one(y, x);
-				if(value > max && old_y != y && old_x != x) 
+				if(value > max && old_y != y && old_x != x) //如果右更多的空位置，并且不是已经有的位置（产生新的数据不能覆盖旧的欸）
 				{
 					*new_y = y;
 					*new_x = x;
 					old_x = x;
 					old_y = y;
-					break;
+					break;//更换成新的坐标
 				}
 			}
 		}

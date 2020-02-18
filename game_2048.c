@@ -13,7 +13,7 @@
 */
 
 //main interface
-int a[4][4]={0};
+int a[4][4]={0};//二维数组
 //numbers of spaces
 int empty;
 int old_y,old_x;
@@ -45,13 +45,13 @@ void init()
 {
 	int x, y;
 
-	initscr();
-	cbreak();
-	noecho();
-	curs_set(0);
+	initscr();//设置所有curses所需的初值,清除屏幕上所有字符
+	cbreak();//调用cbreak函数后，除了"Del"和"Ctrl"键外，接受其他所有字符输入
+	noecho();//noecho()/echo()：关闭/打开输入回显功能
+	curs_set(0);//个函数用来设制光标是否可见。它的参数可以是：0（不可见），1（可见），2（完全可见）
 
 	empty = 15;
-	srand(time(0));
+	srand(time(0));//用当前时间来设定rand函数所用的随机数产生演算法的种子值。
 	x = rand() % 4;
 	y = rand() % 4;
 	a[y][x] = 2;
@@ -64,16 +64,16 @@ void draw()
 	char c[4] = {'0', '0', '0', '0'};
 	clear();
 
-	for(n = 0; n < 9; n += 2)
+	for(n = 0; n < 9; n += 2)//画出横线
 	{
 		for(m = 0; m < 21; m++)
 		{
-			move(n, m);
-			addch('-');
-			refresh();
+			move(n, m);//光标挪到新的位置
+			addch('-');//将单一的字符打印到屏幕上
+			refresh();//显示到终端，并刷新，只刷新改变的部分
 		}
 	}
-	for(m = 0; m < 22; m +=5)
+	for(m = 0; m < 22; m +=5)//竖着画
 	{
 		for(n = 1; n < 8; n++)
 		{
@@ -95,7 +95,7 @@ void draw_one(int y, int x)
 {
     int i, m, k, j;
     char c[5] = {0x00}; 
-    i = a[y][x];
+    i = a[y][x];//画出这个位置的数字
     m = 0;
     while(i > 0)
     {
@@ -123,7 +123,7 @@ void play()
 	{
 		move = 0;
 		old_empty = empty;
-		ch = getch(); 
+		ch = getch(); //等待用户输入
 		switch(ch) {
 			case 97:
 			case 104:
@@ -414,6 +414,10 @@ void cnt_value(int *new_y, int *new_x)
 int game_over()
 {
 	sleep(1);
-	endwin();
+/*暂停
+当 timeout = 0， 即 Sleep(0)，如果线程调度器的可运行队列中有大于或等于当前线程优先级的就绪线程存在，操作系统会将当前线程从处理器上移除，调度其他优先级高的就绪线程运行；如果可运行队列中的没有就绪线程或所有就绪线程的优先级均低于当前线程优先级，那么当前线程会继续执行，就像没有调用 Sleep(0)一样。
+
+当 timeout > 0 时，如：Sleep(1)，会引发线程上下文切换：调用线程会从线程调度器的可运行队列中被移除一段时间，这个时间段约等于 timeout 所指定的时间长度。为什么说约等于呢？是因为睡眠时间单位为毫秒，这与系统的时间精度有关。*/
+	endwin();//将终端机恢复到使用curses之前的设置
 	exit(0);
 }

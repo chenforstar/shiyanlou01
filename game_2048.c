@@ -94,12 +94,12 @@ void draw()
 void draw_one(int y, int x)
 {
     int i, m, k, j;
-    char c[5] = {0x00}; 
+    char c[5] = {0x00}; //数字的
     i = a[y][x];//画出这个位置的数字
     m = 0;
     while(i > 0)
     {
-        j = i % 10;
+        j = i % 10;//余数
         c[m++] = j + '0';
         i = i / 10;
     }
